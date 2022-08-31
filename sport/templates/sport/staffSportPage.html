@@ -1,0 +1,41 @@
+{% extends 'layout.html' %}
+
+{% block document_title %}
+<title>{{ sport.name }} | SlotBookingApplication</title>
+{% endblock %}
+
+{% block sidebar %}
+{% include 'side-bar.html' %}
+{% endblock %}
+
+{% block main %}
+<div>
+  <div class="display-1">
+    {{ sport.name }}
+  </div>
+  <hr />
+  <div>
+    <h1>Basic Info</h1>
+    <p>Description: {{ sport.description }}</p>
+    <p>Coordinator: {{ sport.coordinator }}</p>
+    <p>Contact Email: <a href="mailto:{{ sport.POCEmail }}">{{ sport.POCEmail }}</a></p>
+  </div>
+  <hr />
+  <div>
+    <h1>Facilities</h1>
+    {% for facility in facilities %}
+    {% include 'sport/staffFacilityCard.html' with f=facility user=request.user %}
+    {% endfor %}
+  </div>
+  <hr />
+  <div>
+    <h1>Booking Info</h1>
+    {% if bookingCount == 0 %}
+    There are no future bookings for this sport!
+    {% else %}
+    There are {{ bookingCount }} future bookings for this sport. For facility-wise breakdown, visit facility page.
+    {% endif %}
+  </div>
+  <hr />
+</div>
+{% endblock %}

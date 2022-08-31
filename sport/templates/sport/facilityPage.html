@@ -1,0 +1,44 @@
+{% extends 'layout.html' %}
+
+{% block document_title %}
+<title>{{ f.name }} - {{ f.sport.name }} | SlotBookingApplication</title>
+{% endblock %}
+
+{% block sidebar %}
+{% include 'side-bar.html' %}
+{% endblock %}
+
+{% block main %}
+<!-- TODO:
+1. List of current bookings for this facility
+2. Add ability to cancel booking
+
+-->
+<main class="m-2">
+  <div class="card p-2">
+    <div class="display-4">{{ f.name }}</div>
+    <div>Sport: {{ f.sport }}</div>
+    <div>Type: {{ f.type }}</div>
+    <div>Location: {{ f.location }}</div>
+    <div>Google Map Link: {{ f.google_map_link }}</div>
+    <div>Capacity: {{ f.capacity }}</div>
+    <div>inventory: {{ f.inventory }}</div>
+    <div>Safety Regulations: {{ f.safety_regulations }}</div>
+    <div>Remarks: {{ f.remarks }}</div>
+  </div>
+</main>
+<hr />
+<main>
+  <div class="h3">Current Slot Bookings</div>
+  {% if slotBookings|length == 0 %}
+  <p>There are no bookings for this facility!</p>
+  {% else %}
+  <div>
+    {% for slotBooking in slotBookings %}
+      {% include 'sport/slotBookingCard.html' with slotBooking=slotBooking user=request.user %}
+    {% endfor %}
+  </div>
+  {% endif %}
+</main>
+
+{% endblock %}

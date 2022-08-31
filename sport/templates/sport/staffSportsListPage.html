@@ -1,0 +1,18 @@
+{% extends 'layout.html' %}
+
+{% block document_title %}
+<title>Sports List | SlotBookingApplication</title>
+{% endblock %}
+
+{% block sidebar %}
+{% include 'side-bar.html' %}
+{% endblock %}
+
+{% block main %}
+{% for sport in sports %}
+<div class="m-2">
+  {% include 'sportCard.html' with sport=sport user=request.user %}
+</div>
+{% endfor %}
+
+{% endblock %}

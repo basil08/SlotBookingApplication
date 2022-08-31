@@ -1,0 +1,22 @@
+<div class="card p-2">
+  <div>
+    <a href="{% url 'sport:facilityPage' f.id %}">
+      {{ f.name }}
+    </a>
+  </div>
+  <div>Sport: {{ f.sport }}</div>
+  <div>Type: {{ f.type }}</div>
+  <div>Location: {{ f.location }}</div>
+  <div>Google Map Link: {{ f.google_map_link }}</div>
+  <div>Capacity: {{ f.capacity }}</div>
+  <div>inventory: {{ f.inventory }}</div>
+  <div>Safety Regulations: {{ f.safety_regulations }}</div>
+  <div>Remarks: {{ f.remarks }}</div>
+
+  {% if user.level != 300 %}
+  <div>
+    <a class="btn btn-primary" href="{% url 'sport:updateFacility' facility.id %}">Update</a>
+  </div>
+  {% endif %}
+
+</div>

@@ -1,0 +1,21 @@
+{% extends 'layout.html' %}
+
+{% block document_title %}
+<title>User List | SlotBookingApplication</title>
+{% endblock %}
+
+{% block sidebar %}
+{% include 'side-bar.html' %}
+{% endblock %}
+
+{% block main %}
+<div class="m-2">
+  <div class="h3">User List</div>
+  <hr />
+  {% for user in users %}
+  <div class="card">
+    <a href="{% url 'sport:bookingHistory' user.id %}">{{ user.first_name  }} {{ user.last_name }} - {{ user.username }}</a>
+  </div>
+  {% endfor %}
+</div>
+{% endblock %}

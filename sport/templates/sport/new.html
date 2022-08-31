@@ -1,0 +1,34 @@
+{% extends 'layout.html' %}
+
+{% block document_title %}
+<title>New Sport | SlotBookingApplication</title>
+{% endblock %}
+
+{% block sidebar %}
+{% include 'side-bar.html' %}
+{% endblock %}
+
+{% block main %}
+<div class="mt-2">
+  <div class="mt-2">
+    <h1>Create New Sport</h1>
+  </div>
+
+  <form enctype="multipart/form-data" action="{% url 'sport:newSport' %}" method="post">
+    {% csrf_token %}
+    {% for field in form %}
+    <div class="form-floating mb-3">
+      <div class="form-errors">
+        {{ field.errors }}
+      </div>
+      {{ field }}
+      <label for="{{ field.id_for_label }}">{{ field.label }} </label>
+      {% if field.help_text %}
+      <p class="form-text text-muted">{{ field.help_text|safe }}</p>
+      {% endif %}
+    </div>
+    {% endfor %}
+    <button type="submit" class="btn btn-primary">Create</button>
+  </form>
+  {% endblock %}
+</div>

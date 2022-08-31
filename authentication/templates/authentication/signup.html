@@ -1,0 +1,40 @@
+{% extends 'base.html' %} {% block document_title %}
+<title>Signup - SlotBookingApplication</title>
+{% endblock %} {% block content %}
+
+{% if user.id %}
+<div class="alert alert-danger" role="alert">
+  You are already logged in as <span class="fw-bold">{{ user.username }}</span>! Please logout to signup with a different account!
+</div>
+{% else %}
+
+<div class="container">
+  <div class="row align-items-center">
+    <div class="col-md-4"></div>
+    <div class="col-md-4">
+      <div class="mt-2">
+        <h1>Signup</h1>
+        </div>
+        <form action="{% url 'authentication:signup' %}" method="post">
+          {% csrf_token %}
+          {% for field in form %}
+          <div class="mb-3">
+            {{ field.errors }}
+            <label for="{{ field.id_for_label }}">{{ field.label }}: </label>
+            {{ field }}
+            {% if field.help_text %}
+            <p class="form-text text-muted">{{ field.help_text|safe }}</p>
+            {% endif %}
+          </div>
+          {% endfor %}
+          <button type="submit" class="btn btn-primary">Submit</button>
+        </form>
+        <div>
+          Already have an account? <a href="{% url 'authentication:login' %}">Login</a>
+        </div>
+      </div>
+    <div class="col-md-4"></div>
+  </div>
+</div>
+{% endif %}
+{% endblock %}

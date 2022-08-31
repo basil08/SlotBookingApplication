@@ -1,0 +1,23 @@
+<div class="border rounded-2 m-2 p-3">
+  {% if review.title %}
+  <h4>{{ review.title }}</h4>
+  {% endif %}
+  <p>
+    {{ review.text }}
+  </p>
+  <div>
+    Rating: {{ review.rating }}
+  </div>
+  <div class="text-muted d-flex justify-content-between">
+    <p>
+      Reviewed by: {{ review.created_by }}
+    </p>
+    <p>
+      Last updated: {{ review.last_updated }}
+    </p>
+    <div>
+      <a href="{% url 'movie:updateReview' review.id %}">Update</a>
+      <a href="{% url 'movie:deleteReview' review.id %}">Delete</a>
+    </div>
+  </div>
+</div>
