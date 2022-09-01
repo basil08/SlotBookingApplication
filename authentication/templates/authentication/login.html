@@ -7,8 +7,8 @@
 {% block content %}
 {% if user.id %}
 <div class="alert alert-danger" role="alert">
-  You are already logged in as <span class="fw-bold">{{ user.username }} (
-    {% if user.level == 100 %}
+  You are already logged in as <span class="fw-bold">{{ user.username }}
+    ({% if user.level == 100 %}
     Admin
     {% else %}
     {% if user.level == 200 %}

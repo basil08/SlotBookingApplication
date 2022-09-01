@@ -2,16 +2,16 @@ from django.shortcuts import render, get_object_or_404, redirect
 from django.http import HttpResponse
 from django.contrib.auth.decorators import login_required, user_passes_test
 from django.contrib import messages
-import datetime
+from datetime import datetime, date
 
 from .utils import is_staff_member, is_user
-from .forms import CreateNewFacilityForm, CreateNewSportForm
+from .forms import CreateNewFacilityForm, CreateNewSlotForm, CreateNewSportForm
 from .models import Facility, Sport, SlotBook
 from authentication.models import User
 
 @login_required
 def dashboard(request):
-  return HttpResponse("This is the SPORT DASHBOARD")
+  return render(request, "sport/dashboard.html")
 
 @login_required
 @user_passes_test(is_staff_member)
@@ -42,18 +42,16 @@ def update_sport(request, sport_id):
   return render(request, "sport/update.html", { 'form': form, 'sport_id': sport_id, 'title': sport.name })
 
 @login_required
-@user_passes_test(is_staff_member)
 def sports_list(request):
   # get a list of all sports created by all staff
   sports = Sport.objects.all()
   return render(request, 'sport/staffSportsListPage.html', {'sports': sports})
 
 @login_required
-@user_passes_test(is_staff_member)
 def sport_page(request, sport_id):
   sport = Sport.objects.get(pk=sport_id)
   facilities = Facility.objects.filter(sport=sport)
-  bookingCount = len(SlotBook.objects.filter(bookingDate__gte=datetime.date.today(), sport=sport))
+  bookingCount = len(SlotBook.objects.filter(bookingDate__gte=date.today(), sport=sport))
   return render(request, 'sport/staffSportPage.html', { 'sport': sport, 'facilities': facilities, 'bookingCount': bookingCount })
 
 @login_required
@@ -88,7 +86,25 @@ def create_new_facility(request):
 @login_required
 @user_passes_test(is_staff_member)
 def create_new_slot(request):
-  pass
+  if request.method == 'POST':
+    form = CreateNewSlotForm(request.POST)
+    if form.is_valid():
+      # this line, omg
+      time_diff = (datetime.combine(date.min, form.cleaned_data['timeEnd']) - datetime.combine(date.min, form.cleaned_data['timeStart'])).total_seconds() / 60.0
+      print(time_diff)
+      if time_diff != float(form.cleaned_data['duration']):
+        messages.error(request, 'Inconsistent start and end times. Duration doesn\'t match TimeStart and TimeEnd')
+        return render(request, 'sport/createNewSlot.html', {'form': form })
+      form.save(created_by=request.user)
+      messages.success(request, "Slot saved successfully!")
+      return render(request, "sport/createNewSlot.html")
+    else:
+      messages.error(request, "Errors in form!")
+      return render(request, "sport/createNewSlot.html", { 'errors': form.errors })
+  else:
+    form = CreateNewSlotForm()
+
+  return render(request, 'sport/createNewSlot.html', { 'form': form })
 
 @login_required
 @user_passes_test(is_staff_member)
@@ -126,13 +142,33 @@ def user_list(request):
   except:
     messages.error(request, "Something went wrong! Please try again!")
     return render(request, "sport/userList.html")
+
 #
 # USER CENTRIC ROUTES
 #
 
 @login_required
 def profile(request):
-  pass
+  user =  User.objects.get(pk=request.user.id)
+  return render(request, "sport/profile.html", { 'user': user })
+
+# @login_required
+# def change_password(request):
+#   if request.method == 'POST':
+#     form = ChangePasswordForm(request.POST)
+#     if form.is_valid():
+
+#       form.save()
+#       messages.success(request, "Password changed successfully!")
+#       return render(request, "sport/changePassword.html")
+#     else:
+#       messages.error(request, "Errors in form!")
+#       return render(request, "sport/changePassword.html", { 'errors': form.errors })
+#   else:
+#     form = CreateNewFacilityForm()
+
+#   return render(request, 'sport/createNewFacility.html', { 'form': form })
+
 
 @login_required
 def booking_history(request, user_id):
@@ -141,8 +177,8 @@ def booking_history(request, user_id):
     return redirect('sport:dashboard')
 
   user = User.objects.get(pk=user_id)
-  slotBookings = SlotBook.objects.filter(created_by=user, bookingDate__gte=datetime.date.today())
-  pastBookings = SlotBook.objects.filter(created_by=user, bookingDate__lte=datetime.date.today())
-  return render(request, 'sport/bookingHistory.html', { 'slotBookings': slotBookings, 'pastBookings': pastBookings })
+  slotBookings = SlotBook.objects.filter(created_by=user, bookingDate__gte=date.today())
+  pastBookings = SlotBook.objects.filter(created_by=user, bookingDate__lte=date.today())
+  return render(request, 'sport/bookingHistory.html', { 'user': user, 'slotBookings': slotBookings, 'pastBookings': pastBookings })
 
 

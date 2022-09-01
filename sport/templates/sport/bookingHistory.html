@@ -9,5 +9,37 @@
 {% endblock %}
 
 {% block main %}
-  
+  <div>
+    <div class="h4">
+      User: {{ user.first_name }} {{ user.last_name}} ({{ user.username}})
+    </div>
+
+    <div>
+      <div class="h3">
+        Slot Bookings
+      </div>
+      <hr />
+      {% if slotBookings|length == 0 %}
+        <p>No current bookings by this user!</p>
+      {% else %}
+        {% for slotBooking in slotBookings %}
+          {% include 'slotBookingCard.html' with slotBooking=slotBooking %}
+        {% endfor %}
+      {% endif %}
+    </div>
+
+    <div>
+      <div class="h3">
+        Past Slot Bookings
+      </div>
+      <hr />
+      {% if pastBookings|length == 0 %}
+        <p>No past bookings by this user!</p>
+      {% else %}
+        {% for slotBooking in pastBookings %}
+          {% include 'slotBookingCard.html' with slotBooking=slotBooking %}
+        {% endfor %}
+      {% endif %}
+    </div>
+  </div>
 {% endblock %}

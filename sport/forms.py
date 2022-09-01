@@ -70,19 +70,24 @@ class CreateNewSlotForm(forms.ModelForm):
   class Meta:
     model = Slot
     fields = (
+      'sport',
       'facility',
       'duration',
       'timeStart',
-      'timeEnd'
+      'timeEnd',
+      'frequency'
     )
 
   def __init__(self, *args, **kwargs):
     super(CreateNewSlotForm, self).__init__(*args, **kwargs)
     for field in iter(self.fields):
+
       self.fields[field].widget.attrs.update({
         'class': 'form-control',
         'placeholder': None
       })
+
+    # self.fields['facility'].queryset = Facility.objects.filter(sport=2)
 
   def save(self, commit=True, *args, **kwargs):
     slot = super(CreateNewSlotForm, self).save(commit=False)

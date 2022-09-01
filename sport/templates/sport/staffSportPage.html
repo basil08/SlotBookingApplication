@@ -28,6 +28,7 @@
     {% endfor %}
   </div>
   <hr />
+  {% if user.level != 300 %}
   <div>
     <h1>Booking Info</h1>
     {% if bookingCount == 0 %}
@@ -37,5 +38,6 @@
     {% endif %}
   </div>
   <hr />
+  {% endif %}
 </div>
 {% endblock %}

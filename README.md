@@ -6,6 +6,9 @@
 
 # TODO
 1. Change sidebar
+2. Limit choices of facilities to selected sport in CreateNewSlotForm
+3. decide duration: FloatField ok or not since timeStart - timeEnd should match duration in CreateNewSlotForm
+
 
 
 # MODELS

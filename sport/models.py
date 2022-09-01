@@ -8,6 +8,13 @@ import datetime
 
 GENERIC_SAFETY_REGULATIONS = 'Please maintain social distancing and maintain COVID guidelines at all times. Any nuisance is punishable.'
 
+SLOT_FREQUENCY = (
+  ('DAILY', 'Daily'),
+  ('WEEKLY', 'Weekly'),
+  ('MONTHLY', 'Monthly'),
+  ('YEARLY', 'Yearly')
+)
+
 def is_future_date(date):
   if date < datetime.date.today():
     raise ValidationError(
@@ -43,11 +50,16 @@ class Facility(models.Model):
   created_at = models.DateTimeField(auto_now_add=True)
   last_updated = models.DateTimeField(auto_now=True)
 
+  def __str__(self):
+    return u'{0}'.format(self.name)
+
 class Slot(models.Model):
+  sport = models.ForeignKey(Sport, on_delete=models.CASCADE)
   facility = models.ForeignKey(Facility, on_delete=models.CASCADE)
   duration = models.FloatField(default=60)  # in minutes
-  timeStart = models.IntegerField()
-  timeEnd = models.IntegerField()
+  timeStart = models.TimeField()
+  timeEnd = models.TimeField()
+  frequency = models.CharField(max_length=20, choices=SLOT_FREQUENCY)
 
   created_by = models.ForeignKey(User, on_delete=models.CASCADE, null=True, blank=True)
   created_at = models.DateTimeField(auto_now_add=True)
@@ -58,6 +70,7 @@ class SlotBook(models.Model):
   slot = models.ForeignKey(Slot, on_delete=models.CASCADE)
   sport = models.ForeignKey(Sport, on_delete=models.CASCADE)
   facility = models.ForeignKey(Facility, on_delete=models.CASCADE)
+  type = models.CharField(max_length=20, choices=SLOT_FREQUENCY)
 
   created_by = models.ForeignKey(User, on_delete=models.CASCADE, null=True, blank=True)
   created_at = models.DateTimeField(auto_now_add=True)
