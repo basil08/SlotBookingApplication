@@ -1,7 +1,7 @@
 {% extends 'layout.html' %}
 
 {% block document_title %}
-<title>New Slot | SlotBookingApplication</title>
+<title>Update Sport | SlotBookingApplication</title>
 {% endblock %}
 
 {% block sidebar %}
@@ -11,21 +11,11 @@
 {% block main %}
 <div class="mt-2">
   <div class="mt-2">
-    <h1>Create New Slot</h1>
+    <h1>Update {{ sport.name }} Details</h1>
   </div>
 
-  <form  action="{% url 'sport:newSlot' %}" method="post">
+  <form action="{% url 'sport:updateSport' sport.id %}" method="post">
     {% csrf_token %}
-    <ul>
-      {% for error in form.errors %}
-      <li>
-        <div class="alert-dismissable">
-          {{ error }}
-          <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
-        </div>
-      </li>
-      {% endfor %}
-    </ul>
     {% for field in form %}
     <div class="form-floating mb-3">
       <div class="form-errors">
@@ -38,7 +28,8 @@
       {% endif %}
     </div>
     {% endfor %}
-    <button type="submit" class="btn btn-primary">Create</button>
+    <button type="submit" class="btn btn-primary">Update</button>
+    <a href="{% url 'sport:dashboard' %}" class="btn btn-secondary">Cancel</a>
   </form>
-  {% endblock %}
 </div>
+{% endblock %}

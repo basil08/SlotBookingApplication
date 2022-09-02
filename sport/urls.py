@@ -7,6 +7,7 @@ app_name = "sport"
 urlpatterns = [
   # common routes
   path('dashboard/', views.dashboard, name='dashboard'),
+  path('bookingHistory/<int:user_id>/', views.booking_history, name='bookingHistory'),
   # work
   path('profile/', views.profile, name='profile'),
   # work
@@ -18,11 +19,11 @@ urlpatterns = [
   path('newSport/', views.create_new_sport, name='newSport'),
   path('newFacility/', views.create_new_facility, name='newFacility'),
   path('newSlot/', views.create_new_slot, name='newSlot'),
-  path('updateSport', views.update_sport, name='updateSport'),
+  path('updateSport/<int:sport_id>/', views.update_sport, name='updateSport'),
   path('updateFacility/<int:sport_id>/', views.update_facility, name='updateFacility'),
   path('updateSlot/', views.update_slot, name='updateSlot'),
-  path('cancelSlotBooking/<int:slotbook_id>/', views.cancel_slot_booking, name="cancelSlotBooking"),
+  path('cancelSlotBooking/<int:slot_id>/', views.cancel_slot_booking, name="cancelSlotBooking"),
   path('userList/', views.user_list, name="userList"),
   # user routes
-  path('bookingHistory/<int:user_id>/', views.booking_history, name='bookingHistory')
+  path('bookSlot/<int:slot_id>/', views.book_slot, name='bookSlot')
 ]

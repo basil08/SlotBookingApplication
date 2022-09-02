@@ -24,7 +24,9 @@
   <div>
     <h1>Facilities</h1>
     {% for facility in facilities %}
-    {% include 'sport/staffFacilityCard.html' with f=facility user=request.user %}
+    <div class="m-3">
+      {% include 'sport/staffFacilityCard.html' with f=facility user=request.user %}
+    </div>
     {% endfor %}
   </div>
   <hr />

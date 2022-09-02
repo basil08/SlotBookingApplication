@@ -4,12 +4,19 @@
 # BUGS
 
 
+
+# Places to include emails
+1. When a slot is updated, notify everyone who booked that slot
+
+2. Successfully booked a slot
+
+3. Booking cancelled by an admin 
+
 # TODO
 1. Change sidebar
 2. Limit choices of facilities to selected sport in CreateNewSlotForm
 3. decide duration: FloatField ok or not since timeStart - timeEnd should match duration in CreateNewSlotForm
-
-
+4. Add a note explaining reason for cancellation in email when staff cancels a booking
 
 # MODELS
 

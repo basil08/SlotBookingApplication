@@ -67,8 +67,9 @@ def signup(request):
       user.set_password(password)
       user.save()
 
+      form = SignupForm()
       messages.success(request, 'Account created successfully!')
-      return render(request, 'authentication/signup.html')
+      return render(request, 'authentication/signup.html', { 'form': form })
     else:
       messages.error(request, "Bahut saare errors hai. Pehle theek karo phir try karna")
       return render(request, 'authentication/signup.html')

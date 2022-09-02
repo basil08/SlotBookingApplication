@@ -1,0 +1,48 @@
+{% extends 'layout.html' %}
+
+{% block document_title %}
+<title>All Slot Bookings | SlotBookingApplication</title>
+{% endblock %}
+
+{% block sidebar %}
+{% include 'side-bar.html' %}
+{% endblock %}
+
+{% block main %}
+<div>
+  <div class="h3">
+    Slot Bookings
+  </div>
+  <hr />
+  {% if slots|length == 0 %}
+    <p>No current bookings!</p>
+  {% else %}
+    {% for slot in slots %}
+    <div class="m-2">
+      <div class="card">
+
+        <p class="p-1 fw-bold">{{ slot.sport.name }} - {{ slot.facility.name }} {% if slot.is_booked == False %}(Not booked){% endif %}</p>
+        {% include 'sport/slotCard.html' with slot=slot %}
+      </div>
+    </div>
+    {% endfor %}
+  {% endif %}
+</div>
+
+<div>
+  <div class="h3">
+    Past Slot Bookings
+  </div>
+  <hr />
+  {% if previousSlots|length == 0 %}
+    <p>No past bookings!</p>
+  {% else %}
+    {% for slotBooking in previousSlots %}
+    <div class="m-2">
+      {% include 'sport/slotCard.html' with slot=slotBooking %}
+    </div>
+    {% endfor %}
+  {% endif %}
+</div>
+
+{% endblock %}

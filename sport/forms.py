@@ -1,5 +1,4 @@
 from django import forms
-import time
 from sport.models import Facility, Slot, Sport
 
 class CreateNewSportForm(forms.ModelForm):
@@ -72,12 +71,17 @@ class CreateNewSlotForm(forms.ModelForm):
     fields = (
       'sport',
       'facility',
-      'duration',
+      'date',
       'timeStart',
       'timeEnd',
-      'frequency'
+      'duration',
     )
 
+    labels = {
+      'duration': 'Duration (in mins)',
+      'timeStart': 'Start Time',
+      'timeEnd': 'End Time'
+    }
   def __init__(self, *args, **kwargs):
     super(CreateNewSlotForm, self).__init__(*args, **kwargs)
     for field in iter(self.fields):

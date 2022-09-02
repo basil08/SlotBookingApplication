@@ -23,7 +23,9 @@
         <p>No current bookings by this user!</p>
       {% else %}
         {% for slotBooking in slotBookings %}
-          {% include 'slotBookingCard.html' with slotBooking=slotBooking %}
+        <div class="m-2">
+          {% include 'sport/slotCard.html' with slot=slotBooking %}
+        </div>
         {% endfor %}
       {% endif %}
     </div>
@@ -37,7 +39,9 @@
         <p>No past bookings by this user!</p>
       {% else %}
         {% for slotBooking in pastBookings %}
-          {% include 'slotBookingCard.html' with slotBooking=slotBooking %}
+        <div class="m-2">
+          {% include 'sport/slotCard.html' with slot=slotBooking %}
+        </div>
         {% endfor %}
       {% endif %}
     </div>

@@ -1,0 +1,48 @@
+<div class=" card p-2 container">
+  <!-- TODO: Might add facility name baadme -->
+  {% if slot.is_booked %}
+  <div class="row">
+    <div class="col">
+      {{ slot.date }}
+    </div>
+    <div class="col">
+      {{slot.duration }} mins
+    </div>
+    <div class="col">
+      {{ slot.timeStart }} - {{ slot.timeEnd }}
+    </div>
+  </div>
+  <div class="d-flex flex-row justify-content-between">
+    <div class="col">
+      <span class="text-muted">
+        Booked by: {{ slot.booked_by }}
+      </span>
+    </div>
+    {% if user.level != 300 %}
+      <div class="col">
+        <a class="btn btn-danger" href="{% url 'sport:cancelSlotBooking' slot.id %}">Cancel</a>
+      </div>
+    {% endif %}
+  </div>
+  {% endif %}
+  {% if slot.is_booked == False %}
+    <div class="row">
+      <div class="col">
+        {{ slot.date }}
+      </div>
+      <div class="col">
+        {{ slot.timeStart }} - {{ slot.timeEnd }}
+      </div>
+      <div class="col">
+        {{ slot.duration }} mins
+      </div>
+    </div>
+    {% if user.level > 200 %}
+    <div class="row">
+      <div class="col">
+        <a class="btn btn-primary" href="{% url 'sport:bookSlot' slot.id %}">Book</a>
+      </div>
+    </div>
+    {% endif %}
+  {% endif %}
+</div>

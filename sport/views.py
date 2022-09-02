@@ -6,7 +6,7 @@ from datetime import datetime, date
 
 from .utils import is_staff_member, is_user
 from .forms import CreateNewFacilityForm, CreateNewSlotForm, CreateNewSportForm
-from .models import Facility, Sport, SlotBook
+from .models import Facility, Sport, Slot
 from authentication.models import User
 
 @login_required
@@ -21,10 +21,11 @@ def create_new_sport(request):
     if form.is_valid():
       form.save(created_by=request.user)
       messages.success(request, "Sport saved successfully!")
-      return render(request, "sport/new.html")
+      form = CreateNewSportForm()
+      return render(request, "sport/createNewSport.html", {'form': form} )
     else:
       messages.error(request, "Errors in form!")
-      return render(request, "sport/new.html", { 'errors': form.errors })
+      return render(request, "sport/createNewSport.html", { 'errors': form.errors })
   else:
     form = CreateNewSportForm()
 
@@ -51,20 +52,32 @@ def sports_list(request):
 def sport_page(request, sport_id):
   sport = Sport.objects.get(pk=sport_id)
   facilities = Facility.objects.filter(sport=sport)
-  bookingCount = len(SlotBook.objects.filter(bookingDate__gte=date.today(), sport=sport))
+  bookingCount = len(Slot.objects.filter(date__gte=date.today(), sport=sport))
   return render(request, 'sport/staffSportPage.html', { 'sport': sport, 'facilities': facilities, 'bookingCount': bookingCount })
 
 @login_required
-@user_passes_test(is_staff_member)
 def facility_page(request, facility_id):
   facility = Facility.objects.select_related().get(pk=facility_id)
-  slotBookings = SlotBook.objects.select_related().filter(facility=facility)
-  return render(request, 'sport/facilityPage.html', { 'f': facility, 'slotBookings': slotBookings })
+  if request.user.level < 300:
+    slots = Slot.objects.select_related().filter(facility=facility).order_by('-date')
+    return render(request, 'sport/facilityPage.html', { 'f': facility, 'slots': slots })
+  elif request.user.level == 300:
+    # handle user
+    slots = Slot.objects.filter(facility=facility).order_by('-date')
+    return render(request, "sport/facilityPage.html", { 'f': facility, 'slots': slots })
 
 @login_required
 @user_passes_test(is_staff_member)
 def slot_bookings(request):
-  pass
+  # admin dashboard to cancel any request
+  try:
+    slots = Slot.objects.select_related().filter(date__gte=date.today()).order_by('date')
+    previousSlots = Slot.objects.select_related().filter(date__lte=date.today())
+    return render(request, "sport/allSlotBookings.html", { 'slots': slots, 'previousSlots': previousSlots})
+  except:
+    messages.error(request, "Error while fetching list of slots")
+    return render(request, "sport/allSlotBookings.html")
+
 
 @login_required
 @user_passes_test(is_staff_member)
@@ -74,7 +87,8 @@ def create_new_facility(request):
     if form.is_valid():
       form.save(created_by=request.user)
       messages.success(request, "Facility saved successfully!")
-      return render(request, "sport/createNewFacility.html")
+      form = CreateNewFacilityForm()
+      return render(request, "sport/createNewFacility.html", { 'form': form })
     else:
       messages.error(request, "Errors in form!")
       return render(request, "sport/createNewFacility.html", { 'errors': form.errors })
@@ -91,14 +105,16 @@ def create_new_slot(request):
     if form.is_valid():
       # this line, omg
       time_diff = (datetime.combine(date.min, form.cleaned_data['timeEnd']) - datetime.combine(date.min, form.cleaned_data['timeStart'])).total_seconds() / 60.0
-      print(time_diff)
       if time_diff != float(form.cleaned_data['duration']):
         messages.error(request, 'Inconsistent start and end times. Duration doesn\'t match TimeStart and TimeEnd')
         return render(request, 'sport/createNewSlot.html', {'form': form })
       form.save(created_by=request.user)
       messages.success(request, "Slot saved successfully!")
-      return render(request, "sport/createNewSlot.html")
+      form = CreateNewSlotForm()
+      return render(request, "sport/createNewSlot.html", { 'form': form})
     else:
+      # print(form.errors)
+      print(form.errors)
       messages.error(request, "Errors in form!")
       return render(request, "sport/createNewSlot.html", { 'errors': form.errors })
   else:
@@ -108,8 +124,14 @@ def create_new_slot(request):
 
 @login_required
 @user_passes_test(is_staff_member)
-def update_sport(request):
-  pass
+def update_sport(request, sport_id):
+  sport = get_object_or_404(Sport, pk=sport_id)
+  form = CreateNewSportForm(request.POST or None, instance=sport)
+  if form.is_valid():
+    form.save(created_by=request.user)
+    messages.success(request, "{} updated successfully!".format(sport.name))
+    return redirect("sport:dashboard")
+  return render(request, "sport/updateSport.html", { 'form': form, 'sport': sport })
 
 @login_required
 @user_passes_test(is_staff_member)
@@ -123,15 +145,17 @@ def update_slot(request):
 
 @login_required
 @user_passes_test(is_staff_member)
-def cancel_slot_booking(request, slotbook_id):
+def cancel_slot_booking(request, slot_id):
   try:
-    slotBook = SlotBook.objects.get(pk=slotbook_id)
-    slotBook.delete()
-    messages.success(request, "Slot Booking with id {} was cancelled. The slot is empty now.".format(slotBook.id))
-    return redirect('sport:facilityPage')
+    slot = Slot.objects.get(pk=slot_id)
+    slot.is_booked = False
+    slot.booked_by = None
+    slot.save()
+    messages.success(request, "Slot Booking with id {} was cancelled. The slot is empty now.".format(slot.id))
+    return redirect('sport:facilityPage', facility_id=slot.facility.id)
   except:
     messages.error(request, "Something went wrong! Please try again!")
-    return redirect('sport:facilityPage')
+    return redirect('sport:facilityPage', facility_id=slot.facility.id)
 
 @login_required
 @user_passes_test(is_staff_member)
@@ -177,8 +201,22 @@ def booking_history(request, user_id):
     return redirect('sport:dashboard')
 
   user = User.objects.get(pk=user_id)
-  slotBookings = SlotBook.objects.filter(created_by=user, bookingDate__gte=date.today())
-  pastBookings = SlotBook.objects.filter(created_by=user, bookingDate__lte=date.today())
+  slotBookings = Slot.objects.filter(booked_by=user, date__gte=date.today())
+  pastBookings = Slot.objects.filter(booked_by=user, date__lte=date.today())
   return render(request, 'sport/bookingHistory.html', { 'user': user, 'slotBookings': slotBookings, 'pastBookings': pastBookings })
 
-
+@login_required
+def book_slot(request, slot_id):
+  try:
+    slot = Slot.objects.select_related().get(pk=slot_id)
+    slot.is_booked = True
+    slot.booked_by = request.user
+    slot.save()
+    messages.success(request, "You have booked a slot {}: {}-{} for {} mins".format(slot.facility.name, slot.timeStart, slot.timeEnd, slot.duration))
+    # return render(request, "sport/facilityPage.html")
+    return redirect('sport:facilityPage', facility_id=slot.facility.id)
+  except:
+    raise
+    messages.error(request, "Error while booking your slot!")
+    return render(request, "sport/facilityPage.html")
+    # return redirect('sport:facilityPage')

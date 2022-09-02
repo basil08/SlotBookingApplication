@@ -22,23 +22,47 @@
     <div>Location: {{ f.location }}</div>
     <div>Google Map Link: {{ f.google_map_link }}</div>
     <div>Capacity: {{ f.capacity }}</div>
-    <div>inventory: {{ f.inventory }}</div>
+    <div>Inventory: {{ f.inventory }}</div>
     <div>Safety Regulations: {{ f.safety_regulations }}</div>
     <div>Remarks: {{ f.remarks }}</div>
   </div>
 </main>
 <hr />
+<!-- For staff and admin -->
+{% if user.level != 300 %}
+  <main>
+    <div class="h3">Current Slot Bookings</div>
+    {% if slots|length == 0 %}
+    <p>There are no bookings for this facility!</p>
+    {% else %}
+    <div>
+      {% for slot in slots %}
+      <div class="m-2">
+        {% include 'sport/slotCard.html' with slot=slot user=request.user %}
+      </div>
+      {% endfor %}
+    </div>
+    {% endif %}
+  </main>
+{% endif %}
+<!-- For users -->
+{% if user.level == 300 %}
 <main>
-  <div class="h3">Current Slot Bookings</div>
-  {% if slotBookings|length == 0 %}
-  <p>There are no bookings for this facility!</p>
-  {% else %}
+  <div class="h3">
+    Slots
+  </div>
+  {% if slots|length == 0 %}
   <div>
-    {% for slotBooking in slotBookings %}
-      {% include 'sport/slotBookingCard.html' with slotBooking=slotBooking user=request.user %}
+    <p>There are no slots for this facility!</p>
+    {% else %}
+    {% for slot in slots %}
+    <div class="m-2">
+      {% include 'sport/slotCard.html' with slot=slot user=request.user %}
+    </div>
     {% endfor %}
   </div>
   {% endif %}
 </main>
+{% endif %}
 
 {% endblock %}

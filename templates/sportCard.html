@@ -1,6 +1,10 @@
 <div class="card p-2">
-  <a href="{% url 'sport:sportPage' sport.id %}" class="display-3">{{ sport.name }}</a>
+  <a href="{% url 'sport:sportPage' sport.id %}" class="display-6">{{ sport.name }}</a>
   <p>Description: {{ sport.description }}</p>
   <p>Coordinator: {{ sport.coordinator }}</p>
   <p>Contact Email: {{ sport.POCEmail }}</p>
+
+  <div>
+    <a class="btn btn-primary" href="{% url 'sport:updateSport' sport.id %}">Update</a>
+  </div>
 </div>
