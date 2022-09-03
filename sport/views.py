@@ -6,9 +6,10 @@ from datetime import datetime, date
 from django.core.mail import BadHeaderError, send_mail
 
 from .utils import is_staff_member, is_user
-from .forms import CreateNewFacilityForm, CreateNewSlotForm, CreateNewSportForm
-from .models import Facility, Sport, Slot
+from .forms import CreateNewFacilityForm, CreateNewSlotForm, CreateNewSportForm, CreateNewReviewForm
+from .models import Facility, Sport, Slot, Review
 from authentication.models import User
+from copy import deepcopy
 
 
 @login_required
@@ -79,11 +80,31 @@ def slot_bookings(request):
   try:
     slots = Slot.objects.select_related().filter(date__gte=date.today()).order_by('date')
     previousSlots = Slot.objects.select_related().filter(date__lte=date.today())
+    for slot in previousSlots:
+      if slot.is_reviewed:
+        review = Review.objects.get(slot=slot.id)
+        slot['review'] = review
     return render(request, "sport/allSlotBookings.html", { 'slots': slots, 'previousSlots': previousSlots})
   except:
     messages.error(request, "Error while fetching list of slots")
     return render(request, "sport/allSlotBookings.html")
 
+@login_required
+@user_passes_test(is_user)
+def create_new_review(request):
+  if request.method == 'POST':
+    form = CreateNewReviewForm(request.POST)
+    if form.is_valid():
+      form.save(created_by=request.user)
+      messages.success(request, "Review saved successfully!")
+      return redirect('sport:dashboard')
+    else:
+      messages.error(request, "Errors in form!")
+      return render(request, "sport/createNewReview.html", { 'form': form })
+  else:
+    form = CreateNewReviewForm()
+
+  return render(request, "sport/createNewReview.html", {'form': form})
 
 @login_required
 @user_passes_test(is_staff_member)
@@ -140,13 +161,50 @@ def update_sport(request, sport_id):
 
 @login_required
 @user_passes_test(is_staff_member)
-def update_facility(request):
-  pass
+def update_facility(request, facility_id):
+  facility = get_object_or_404(Facility, pk=facility_id)
+  form = CreateNewFacilityForm(request.POST or None, request.FILES or None, instance=facility)
+  if form.is_valid():
+    form.save(created_by=request.user)
+    messages.success(request, "{} updated successfully!".format(facility.name))
+    return redirect("sport:dashboard")
+  return render(request, "sport/updateFacility.html", { 'form': form, 'facility': facility })
 
 @login_required
 @user_passes_test(is_staff_member)
-def update_slot(request):
-  pass
+def update_slot(request, slot_id):
+  slot = Slot.objects.select_related().get(pk=slot_id)
+  old_slot = deepcopy(slot)
+  form = CreateNewSlotForm(request.POST or None, request.FILES or None, instance=slot)
+  if form.is_valid():
+    time_diff = (datetime.combine(date.min, form.cleaned_data['timeEnd']) - datetime.combine(date.min, form.cleaned_data['timeStart'])).total_seconds() / 60.0
+    if time_diff != float(form.cleaned_data['duration']):
+      messages.error(request, 'Inconsistent start and end times. Duration doesn\'t match TimeStart and TimeEnd')
+      return render(request, 'sport/updateSlot.html', {'form': form, 'slot': slot })
+    form.save(created_by=request.user)
+    slot = Slot.objects.select_related().get(pk=slot_id)
+
+    if old_slot.is_booked:
+      try:
+        user = old_slot.booked_by
+        send_mail(
+          'Slot DETAILS UPDATED: IITD SlotBookingApplication',
+          'Dear {},\nThe details of your slot with the following details has been updated:\n{} ({}): {}-{} for {} mins.\n\nThe new details are:\n{} ({}): {}-{} for {} mins.\n\nPlease note the new details. Sorry for the inconvenience.\n\nFor any query, contact {}\n\nBest,\nTechnical Team,\nIITD SlotBookingApplication'
+            .format(user.first_name + ' ' + user.last_name, old_slot.facility.name, old_slot.sport.name, old_slot.timeStart, old_slot.timeEnd, old_slot.duration, slot.facility.name, slot.sport.name, slot.timeStart, slot.timeEnd, slot.duration, slot.sport.POCEmail),
+          'gs454236@gmail.com',
+          [user.email],
+          fail_silently=False
+        )
+      except BadHeaderError:
+        messages.error(request, 'Slot Updated! Couldn\'t send email. Please contact admin for acknowledgement')
+        return redirect('sport:facilityPage', facility_id=slot.facility.id)
+      except:
+        messages.error(request, "Something went wrong while sending email. Please contact admin for acknowledgement")
+        return redirect('sport:facilityPage', facility_id=slot.facility.id)
+
+    messages.success(request, "{} updated successfully! If this slot was booked, the booker is notified by email.".format(slot.sport.name))
+    return redirect("sport:dashboard")
+  return render(request, "sport/updateSlot.html", { 'form': form, 'slot': slot })
 
 @login_required
 @user_passes_test(is_staff_member)
@@ -167,7 +225,7 @@ def cancel_slot_booking(request, slot_id):
       try:
         send_mail(
           'Slot booking CANCELLATION: IITD SlotBookingApplication',
-          'Dear {},\n Your slot with the following details:\n{} ({}): {}-{} for {} mins stands cancelled.\n\n{}\n\nSorry for the inconvenience.\n\nFor any query, contact {}\n\nBest,\nTechnical Team,\nIITD SlotBookingApplication'
+          'Dear {},\nYour slot with the following details:\n{} ({}): {}-{} for {} mins stands cancelled.\n\n{}\n\nSorry for the inconvenience.\n\nFor any query, contact {}\n\nBest,\nTechnical Team,\nIITD SlotBookingApplication'
             .format(user.first_name + ' ' + user.last_name, slot.facility.name, slot.sport.name, slot.timeStart, slot.timeEnd, slot.duration, remark_text, slot.sport.POCEmail),
           'gs454236@gmail.com',
           [request.user.email],

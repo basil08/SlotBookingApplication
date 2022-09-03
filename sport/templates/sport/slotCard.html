@@ -6,10 +6,10 @@
       {{ slot.date }}
     </div>
     <div class="col">
-      {{slot.duration }} mins
+      {{ slot.timeStart }} - {{ slot.timeEnd }}
     </div>
     <div class="col">
-      {{ slot.timeStart }} - {{ slot.timeEnd }}
+      {{slot.duration }} mins
     </div>
   </div>
   <div class="d-flex flex-row justify-content-between">
@@ -17,6 +17,11 @@
       <span class="text-muted">
         Booked by: {{ slot.booked_by }}
       </span>
+    </div>
+    <div class="row">
+      <div class="col">
+        <a class="btn btn-primary" href="{% url 'sport:updateSlot' slot.id %}">Update</a>
+      </div>
     </div>
     {% if user.level != 300 %}
       <div class="col">
@@ -52,6 +57,12 @@
         <p class="text-muted">Not booked</p>
       </div>
     </div>
+    <div class="row">
+      <div class="col">
+        <a class="btn btn-primary" href="{% url 'sport:updateSlot' slot.id %}">Update</a>
+      </div>
+
+    </div>
     {% endif %}
     {% if user.level > 200 %}
     <div class="row">
@@ -59,6 +70,7 @@
         <a class="btn btn-primary" href="{% url 'sport:bookSlot' slot.id %}">Book</a>
       </div>
     </div>
+
     {% endif %}
   {% endif %}
 </div>

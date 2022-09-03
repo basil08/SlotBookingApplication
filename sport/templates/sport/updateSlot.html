@@ -1,0 +1,35 @@
+{% extends 'layout.html' %}
+
+{% block document_title %}
+<title>Update Slot | SlotBookingApplication</title>
+{% endblock %}
+
+{% block sidebar %}
+{% include 'side-bar.html' %}
+{% endblock %}
+
+{% block main %}
+<div class="mt-2">
+  <div class="mt-2">
+    <h1>Update {{ slot.sport.name }} Slot Details</h1>
+  </div>
+
+  <form action="{% url 'sport:updateSlot' slot.id %}" method="post">
+    {% csrf_token %}
+    {% for field in form %}
+    <div class="form-floating mb-3">
+      <div class="form-errors">
+        {{ field.errors }}
+      </div>
+      {{ field }}
+      <label for="{{ field.id_for_label }}">{{ field.label }} </label>
+      {% if field.help_text %}
+      <p class="form-text text-muted">{{ field.help_text|safe }}</p>
+      {% endif %}
+    </div>
+    {% endfor %}
+    <button type="submit" class="btn btn-primary">Update</button>
+    <a href="{% url 'sport:dashboard' %}" class="btn btn-secondary">Cancel</a>
+  </form>
+</div>
+{% endblock %}

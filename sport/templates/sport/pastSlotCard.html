@@ -1,0 +1,50 @@
+<div class=" card p-2 container">
+  <!-- TODO: Might add facility name baadme -->
+  {% if slot.is_booked %}
+  <div class="row">
+    <div class="col">
+      {{ slot.date }}
+    </div>
+    <div class="col">
+      {{ slot.timeStart }} - {{ slot.timeEnd }}
+    </div>
+    <div class="col">
+      {{slot.duration }} mins
+    </div>
+  </div>
+  <div class="d-flex flex-row justify-content-between">
+    <div class="col">
+      <span class="text-muted">
+        Booked by: {{ slot.booked_by }}
+      </span>
+    </div>
+
+    {% if slot.is_reviewed %}
+    <div class="p-1">
+      <p>
+        {{ slot.review.review }}
+      </p>
+      <p>Rating: {{ slot.review.rating }}/5 </p>
+    </div>
+  {% endif %}
+  </div>
+  {% endif %}
+  {% if slot.is_booked == False %}
+    <div class="row">
+      <div class="col">
+        {{ slot.date }}
+      </div>
+      <div class="col">
+        {{ slot.timeStart }} - {{ slot.timeEnd }}
+      </div>
+      <div class="col">
+        {{ slot.duration }} mins
+      </div>
+    </div>
+    <div class="row">
+      <div class="col">
+        <p class="text-muted">Not booked</p>
+      </div>
+    </div>
+  {% endif %}
+</div>

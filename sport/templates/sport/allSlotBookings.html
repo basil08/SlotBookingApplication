@@ -39,7 +39,10 @@
   {% else %}
     {% for slotBooking in previousSlots %}
     <div class="m-2">
-      {% include 'sport/slotCard.html' with slot=slotBooking %}
+      <div class="card">
+        <p class="p-1 fw-bold">{{ slot.sport.name }} - {{ slot.facility.name }} {% if slot.is_booked == False %}(Not booked){% endif %}</p>
+        {% include 'sport/pastSlotCard.html' with slot=slotBooking %}
+      </div>
     </div>
     {% endfor %}
   {% endif %}

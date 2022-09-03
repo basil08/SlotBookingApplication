@@ -13,7 +13,7 @@
   <div class="h3">User List</div>
   <hr />
   {% for user in users %}
-  <div class="card">
+  <div class="card m-2 p-2">
     <a href="{% url 'sport:bookingHistory' user.id %}">{{ user.first_name  }} {{ user.last_name }} - {{ user.username }}</a>
   </div>
   {% endfor %}

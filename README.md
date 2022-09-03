@@ -1,69 +1,52 @@
+# SYNOPSIS   
+
+`SlotBookingApplication` is a slot booking management system to enable staff and admins to create slots for sports facility and allow users to conveniently book slots.   
+
+Features:   
+1. Email notification triggers on slot manipulation events.   
+2. Access control and authorization to user.  
+3. Staff can create sport, facilities for each sport, and multiple slots for each facility. They can cancel with an optional remark.  
+4. Users can review for slots they booked after the booking date is past.   
+
+This is part of DevClub recruitment tasks 2022'-23'.   
+
+# RUN THIS PROJECT  
+
+0. Update `sport.models.Sport`, `sport.models.Slot`: make created_by field non-nullable.    
+1. Update EMAIL_SETTINGS in settings.py   
+  a. Make an .env file with EMAIL_PASSWORD set to app password of 2FA authenticated google SMTP app. For more, see https://stackoverflow.com/a/28421995  
+2. Update database if you want a different backend (for eg: Postgres, etc.). By default, uses SQLite3  
+3. Setup virtual environment
+4. Run `pip install -r ./requirements.txt`   
+5. Run `python manage.py makemigrations`   
+6. Run `python manage.py migrate`    
+7. Run `python manage.py runserver`    
+
+This starts a local development server ideal for testing. Optionally create a superuser by `python manage.py createsuperuser` although, SlotBookingApplication provides an endpoint at `/auth/signup`   
+
 # NOTE
 1. created_by is nullable in current Sport model. This is only for development convenience. In production, it must be non-nullable
 
-# BUGS
-
-1. Make dashboard
-2. Update features
-3. Email service
-4. Limit number of slots a user can book per day
-5. Email verification
-
-
-# Places to include emails
-1. When a slot is updated, notify everyone who booked that slot
-
-~2. Successfully booked a slot~
-
-3. Booking cancelled by an admin 
-
 # TODO
-1. Change sidebar
-2. Limit choices of facilities to selected sport in CreateNewSlotForm
+
+1. Make dashboard   
+6. Delete resources (sport, facility, slot)   
+~2. Update features~    
+~3. Email service~    
+4. Limit number of slots a user can book per day    
+~7. Review and rating system~    
+5. Email verification    
+6. Streamline slot making process - daily, weekly, monthly, annually, etc.    
+2. Limit choices of facilities to selected sport in CreateNewSlotForm    
 ~3. decide duration: FloatField ok or not since timeStart - timeEnd should match duration in CreateNewSlotForm~
-4. Add a note explaining reason for cancellation in email when staff cancels a booking
+~4. Add a note explaining reason for cancellation in email when staff cancels a booking~
 
-# MODELS
+# Email usecases   
 
-TBD
+~1. When a slot is updated, notify everyone who booked that slot~
+~2. Successfully booked a slot~
+~3. Booking cancelled by an admin~
 
+# APPLICATION DESIGN
 
-# CODE SNIPPETS
-
-1. Custom User Model in Django - https://testdriven.io/blog/django-custom-user-model/#admin
-
-
-
-_users/admin.py_   
-
-```
-from django.contrib import admin
-from django.contrib.auth.admin import UserAdmin
-
-from .forms import CustomUserCreationForm, CustomUserChangeForm
-from .models import CustomUser
-
-
-class CustomUserAdmin(UserAdmin):
-    add_form = CustomUserCreationForm
-    form = CustomUserChangeForm
-    model = CustomUser
-    list_display = ('email', 'is_staff', 'is_active',)
-    list_filter = ('email', 'is_staff', 'is_active',)
-    fieldsets = (
-        (None, {'fields': ('email', 'password')}),
-        ('Permissions', {'fields': ('is_staff', 'is_active')}),
-    )
-    add_fieldsets = (
-        (None, {
-            'classes': ('wide',),
-            'fields': ('email', 'password1', 'password2', 'is_staff', 'is_active')}
-        ),
-    )
-    search_fields = ('email',)
-    ordering = ('email',)
-
-
-admin.site.register(CustomUser, CustomUserAdmin)
-```
-
+Please see design doc attached as a PDF

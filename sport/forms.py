@@ -1,5 +1,5 @@
 from django import forms
-from sport.models import Facility, Slot, Sport
+from sport.models import Facility, Review, Slot, Sport
 
 class CreateNewSportForm(forms.ModelForm):
   class Meta:
@@ -103,3 +103,36 @@ class CreateNewSlotForm(forms.ModelForm):
     if commit:
       slot.save()
     return slot
+
+
+class CreateNewReviewForm(forms.ModelForm):
+  class Meta:
+    model = Review
+    fields = (
+      'slot',
+      'rating',
+      'review'
+    )
+
+  def __init__(self, *args, **kwargs):
+    super(CreateNewReviewForm, self).__init__(*args, **kwargs)
+    for field in iter(self.fields):
+      self.fields[field].widget.attrs.update({
+        'class': 'form-control',
+        'placeholder': None
+      })
+
+  def save(self, commit=True, *args, **kwargs):
+    review = super(CreateNewReviewForm, self).save(commit=False)
+
+    review.slot.is_reviewed = True
+    review.slot.save()
+    
+    created_by = kwargs.pop('created_by', None)
+    if not created_by:
+      raise forms.ValidationError("NO USER ID FOUND")
+
+    review.created_by = created_by
+    if commit:
+      review.save()
+    return review
