@@ -6,6 +6,7 @@ app_name = "sport"
 
 urlpatterns = [
   # common routes
+  path('', views.index, name='index'),
   path('dashboard/', views.dashboard, name='dashboard'),
   path('bookingHistory/<int:user_id>/', views.booking_history, name='bookingHistory'),
   # work

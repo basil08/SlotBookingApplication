@@ -3,11 +3,17 @@ from django.http import HttpResponse
 from django.contrib.auth.decorators import login_required, user_passes_test
 from django.contrib import messages
 from datetime import datetime, date
+from django.core.mail import BadHeaderError, send_mail
 
 from .utils import is_staff_member, is_user
 from .forms import CreateNewFacilityForm, CreateNewSlotForm, CreateNewSportForm
 from .models import Facility, Sport, Slot
 from authentication.models import User
+
+
+@login_required
+def index(request):
+  return redirect('sport:dashboard')
 
 @login_required
 def dashboard(request):
@@ -113,7 +119,6 @@ def create_new_slot(request):
       form = CreateNewSlotForm()
       return render(request, "sport/createNewSlot.html", { 'form': form})
     else:
-      # print(form.errors)
       print(form.errors)
       messages.error(request, "Errors in form!")
       return render(request, "sport/createNewSlot.html", { 'errors': form.errors })
@@ -146,16 +151,40 @@ def update_slot(request):
 @login_required
 @user_passes_test(is_staff_member)
 def cancel_slot_booking(request, slot_id):
-  try:
-    slot = Slot.objects.get(pk=slot_id)
-    slot.is_booked = False
-    slot.booked_by = None
-    slot.save()
-    messages.success(request, "Slot Booking with id {} was cancelled. The slot is empty now.".format(slot.id))
-    return redirect('sport:facilityPage', facility_id=slot.facility.id)
-  except:
-    messages.error(request, "Something went wrong! Please try again!")
-    return redirect('sport:facilityPage', facility_id=slot.facility.id)
+  if request.method == 'POST':
+    remark = request.POST.get('remark', None)
+    try:
+      slot = Slot.objects.select_related().get(pk=slot_id)
+      slot.is_booked = False
+      user = slot.booked_by
+      slot.booked_by = None
+      slot.save()
+
+      if remark:
+        remark_text = 'Reason for cancellation: {}.'.format(remark)
+      else:
+        remark_text = 'No reason for cancellation given. You may contact sport POC.'
+      try:
+        send_mail(
+          'Slot booking CANCELLATION: IITD SlotBookingApplication',
+          'Dear {},\n Your slot with the following details:\n{} ({}): {}-{} for {} mins stands cancelled.\n\n{}\n\nSorry for the inconvenience.\n\nFor any query, contact {}\n\nBest,\nTechnical Team,\nIITD SlotBookingApplication'
+            .format(user.first_name + ' ' + user.last_name, slot.facility.name, slot.sport.name, slot.timeStart, slot.timeEnd, slot.duration, remark_text, slot.sport.POCEmail),
+          'gs454236@gmail.com',
+          [request.user.email],
+          fail_silently=False
+        )
+      except BadHeaderError:
+        messages.error(request, 'Slot Cancelled! Couldn\'t send email. Please contact admin for acknowledgement')
+        return redirect('sport:facilityPage', facility_id=slot.facility.id)
+      except:
+        messages.error(request, "Something went wrong while sending email. Please contact admin for acknowledgement")
+        return redirect('sport:facilityPage', facility_id=slot.facility.id)
+
+      messages.success(request, "Slot Booking with id {} was cancelled. The slot is empty now. The Email is sent to the booker!".format(slot.id))
+      return redirect('sport:facilityPage', facility_id=slot.facility.id)
+    except:
+      messages.error(request, "Something went wrong! Please try again!")
+      return redirect('sport:facilityPage', facility_id=slot.facility.id)
 
 @login_required
 @user_passes_test(is_staff_member)
@@ -212,11 +241,24 @@ def book_slot(request, slot_id):
     slot.is_booked = True
     slot.booked_by = request.user
     slot.save()
-    messages.success(request, "You have booked a slot {}: {}-{} for {} mins".format(slot.facility.name, slot.timeStart, slot.timeEnd, slot.duration))
-    # return render(request, "sport/facilityPage.html")
+
+    try:
+      send_mail(
+        'Slot booking ACKNOWLEDGEMENT: IITD SlotBookingApplication',
+        'Dear {},\n You have successfully booked a slot at {} ({}): {}-{} for {} mins.\n\nPlease follow regulations as specified on the portal. Wishing you a successful event!\n\nFor any query, contact {}\n\nBest,\nTechnical Team,\nIITD SlotBookingApplication'.format(request.user.first_name + ' ' + request.user.last_name, slot.facility.name, slot.sport.name, slot.timeStart, slot.timeEnd, slot.duration, slot.sport.POCEmail),
+        'gs454236@gmail.com',
+        [request.user.email],
+        fail_silently=False
+      )
+    except BadHeaderError:
+      messages.error(request, 'Slot Booked! Couldn\'t send email. Please contact admin for acknowledgement')
+      return redirect('sport:facilityPage', facility_id=slot.facility.id)
+    except:
+      messages.error(request, "Something went wrong while sending email. Please contact admin for acknowledgement")
+      return redirect('sport:facilityPage', facility_id=slot.facility.id)
+
+    messages.success(request, "You have booked a slot {}: {}-{} for {} mins. Check your inbox for confirmation email.".format(slot.facility.name, slot.timeStart, slot.timeEnd, slot.duration))
     return redirect('sport:facilityPage', facility_id=slot.facility.id)
   except:
-    raise
     messages.error(request, "Error while booking your slot!")
     return render(request, "sport/facilityPage.html")
-    # return redirect('sport:facilityPage')

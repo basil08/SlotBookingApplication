@@ -20,7 +20,16 @@
     </div>
     {% if user.level != 300 %}
       <div class="col">
-        <a class="btn btn-danger" href="{% url 'sport:cancelSlotBooking' slot.id %}">Cancel</a>
+        <form action="{% url 'sport:cancelSlotBooking' slot.id %}" method="POST">
+          {% csrf_token %}
+          <label for="remark" name="remark" class="form-label">Reason for cancellation:</label>
+          <span class="d-flex flex-row m-2">
+            <input id="remark" type="text" class="form-control" name="remark" />
+
+            <input class="btn btn-danger" type="submit" value='Cancel' />
+          </span>
+        </form>
+
       </div>
     {% endif %}
   </div>
@@ -37,6 +46,13 @@
         {{ slot.duration }} mins
       </div>
     </div>
+    {% if user.level < 300 %}
+    <div class="row">
+      <div class="col">
+        <p class="text-muted">Not booked</p>
+      </div>
+    </div>
+    {% endif %}
     {% if user.level > 200 %}
     <div class="row">
       <div class="col">

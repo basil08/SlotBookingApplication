@@ -3,19 +3,24 @@
 
 # BUGS
 
+1. Make dashboard
+2. Update features
+3. Email service
+4. Limit number of slots a user can book per day
+5. Email verification
 
 
 # Places to include emails
 1. When a slot is updated, notify everyone who booked that slot
 
-2. Successfully booked a slot
+~2. Successfully booked a slot~
 
 3. Booking cancelled by an admin 
 
 # TODO
 1. Change sidebar
 2. Limit choices of facilities to selected sport in CreateNewSlotForm
-3. decide duration: FloatField ok or not since timeStart - timeEnd should match duration in CreateNewSlotForm
+~3. decide duration: FloatField ok or not since timeStart - timeEnd should match duration in CreateNewSlotForm~
 4. Add a note explaining reason for cancellation in email when staff cancels a booking
 
 # MODELS
