@@ -14,7 +14,7 @@ This is part of DevClub recruitment tasks 2022'-23'.
 
 0. Update `sport.models.Sport`, `sport.models.Slot`: make created_by field non-nullable.    
 1. Update EMAIL_SETTINGS in settings.py   
-  a. Make an .env file with EMAIL_PASSWORD set to app password of 2FA authenticated google SMTP app. For more, see https://stackoverflow.com/a/28421995  
+  a. Make an .env file with EMAIL_PASSWORD set to app password of 2FA authenticated google SMTP app and EMAIL_HOST_USER set to the sender's valid email id. For more, see https://stackoverflow.com/a/28421995  
 2. Update database if you want a different backend (for eg: Postgres, etc.). By default, uses SQLite3  
 3. Setup virtual environment
 4. Run `pip install -r ./requirements.txt`   

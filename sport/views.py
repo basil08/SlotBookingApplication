@@ -10,6 +10,7 @@ from .forms import CreateNewFacilityForm, CreateNewSlotForm, CreateNewSportForm,
 from .models import Facility, Sport, Slot, Review
 from authentication.models import User
 from copy import deepcopy
+import os
 
 
 @login_required
@@ -191,7 +192,7 @@ def update_slot(request, slot_id):
           'Slot DETAILS UPDATED: IITD SlotBookingApplication',
           'Dear {},\nThe details of your slot with the following details has been updated:\n{} ({}): {}-{} for {} mins.\n\nThe new details are:\n{} ({}): {}-{} for {} mins.\n\nPlease note the new details. Sorry for the inconvenience.\n\nFor any query, contact {}\n\nBest,\nTechnical Team,\nIITD SlotBookingApplication'
             .format(user.first_name + ' ' + user.last_name, old_slot.facility.name, old_slot.sport.name, old_slot.timeStart, old_slot.timeEnd, old_slot.duration, slot.facility.name, slot.sport.name, slot.timeStart, slot.timeEnd, slot.duration, slot.sport.POCEmail),
-          'gs454236@gmail.com',
+          os.getenv('EMAIL_HOST_USER'),
           [user.email],
           fail_silently=False
         )
@@ -227,7 +228,7 @@ def cancel_slot_booking(request, slot_id):
           'Slot booking CANCELLATION: IITD SlotBookingApplication',
           'Dear {},\nYour slot with the following details:\n{} ({}): {}-{} for {} mins stands cancelled.\n\n{}\n\nSorry for the inconvenience.\n\nFor any query, contact {}\n\nBest,\nTechnical Team,\nIITD SlotBookingApplication'
             .format(user.first_name + ' ' + user.last_name, slot.facility.name, slot.sport.name, slot.timeStart, slot.timeEnd, slot.duration, remark_text, slot.sport.POCEmail),
-          'gs454236@gmail.com',
+          os.getenv("EMAIL_HOST_USER"),
           [request.user.email],
           fail_silently=False
         )
@@ -304,7 +305,7 @@ def book_slot(request, slot_id):
       send_mail(
         'Slot booking ACKNOWLEDGEMENT: IITD SlotBookingApplication',
         'Dear {},\n You have successfully booked a slot at {} ({}): {}-{} for {} mins.\n\nPlease follow regulations as specified on the portal. Wishing you a successful event!\n\nFor any query, contact {}\n\nBest,\nTechnical Team,\nIITD SlotBookingApplication'.format(request.user.first_name + ' ' + request.user.last_name, slot.facility.name, slot.sport.name, slot.timeStart, slot.timeEnd, slot.duration, slot.sport.POCEmail),
-        'gs454236@gmail.com',
+        os.getenv('EMAIL_HOST_USER'),
         [request.user.email],
         fail_silently=False
       )
